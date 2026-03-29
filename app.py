@@ -501,15 +501,24 @@ def page_state_explorer():
             else:
                 st.plotly_chart(fig_wigner(state_d['W'], xvec, title=f"Wigner — {state_type}"), use_container_width=True)
 
-            neg_str = f"{wnv:.5f}" if wnv > 0.001 else "≈ 0 (classical)"
-            cl = "nonclassical" if wnv > 0.001 else "classical"
+            neg_str = f"{wnv:.5f}" if wnv > 0.001 else "≈ 0"
+            # Physics-correct non-classicality: WNV>0 OR state is intrinsically non-classical (squeezed, cat, DS, GKP, Fock)
+            is_nonclassical = not info.get('classical', True)
+            if wnv > 0.001:
+                nc_text = "This state is <b>non-classical</b> — Wigner function goes negative. ⚡"
+            elif is_nonclassical:
+                nc_text = ("This state is <b>non-classical</b> (quantum). "
+                           "No Wigner negativity for this preset, but non-classicality is present "
+                           "(e.g. squeezed noise below shot-noise, quantum coherence, or sub-Poissonian statistics).")
+            else:
+                nc_text = "This state is <b>classical / Gaussian</b> — Wigner function is always positive."
             st.markdown(f"""
             <div class="insight-card">
                 <div class="title">💡 What you're seeing</div>
                 <p>The Wigner function W(x,p) is a quasi-probability distribution in phase space.
                 <b>Red regions are negative</b> — impossible for classical states.
                 Wigner Negativity Volume = <b>{neg_str}</b>.
-                {'This state is <b>non-classical</b> (quantum).' if wnv>0.001 else 'This state is <b>classical</b> — no negativity.'}</p>
+                {nc_text}</p>
             </div>
             """, unsafe_allow_html=True)
 
@@ -582,6 +591,9 @@ def page_phase_space_zoo():
         ("gkp",              "0.3,3", "GKP δ=0.3"),
     ]
 
+    # Physics-correct non-classicality per state group (not just WNV>0)
+    _NC_GROUPS = {"fock", "squeezed", "cat", "displaced_squeezed", "gkp"}
+
     cols = st.columns(4)
     for idx, (group, key, label) in enumerate(state_configs):
         try:
@@ -591,6 +603,7 @@ def page_phase_space_zoo():
             sd = SD[group][keys[0]]
 
         wnv = sd.get('wnv', 0.0)
+        is_nonclassical = (group in _NC_GROUPS) or (wnv > 0.001)
         data_arr = sd['W'] if "Wigner" in rep else sd['Q']
         cs  = W_CS if "Wigner" in rep else Q_CS
 
@@ -606,7 +619,7 @@ def page_phase_space_zoo():
             fig.add_trace(go.Contour(z=W_np, x=xv, y=xv,
                 contours=dict(start=0,end=0,size=1,coloring="none"),
                 line=dict(color="rgba(255,255,255,0.5)",width=1), showscale=False))
-        badge = "⚡ Non-classical" if wnv>0.001 else "☀️ Classical"
+        badge = "⚡ Non-classical" if is_nonclassical else "☀️ Classical / Gaussian"
         fig.update_layout(
             paper_bgcolor="#020817", plot_bgcolor="#060e24",
             font=dict(color="#e2e8f0", size=9),
@@ -629,13 +642,14 @@ def page_phase_space_zoo():
             sd = list(SD[group].values())[0]
         m   = sd['metrics']
         wnv = sd.get('wnv', 0.0)
+        is_nc = (group in _NC_GROUPS) or (wnv > 0.001)
         rows.append({
             "State": lf,
             "Purity": m.get('purity','—'),
             "Entropy S(ρ)": m.get('entropy','—'),
             "Mandel Q": m.get('mandel_Q','—'),
             "WNV": round(wnv,5),
-            "Non-classical": "✅" if wnv>0.001 else "❌",
+            "Non-classical": "✅" if is_nc else "❌",
         })
     df = pd.DataFrame(rows)
     st.dataframe(df, use_container_width=True, hide_index=True)
@@ -666,7 +680,7 @@ def page_witness_lab():
     </div>
     """, unsafe_allow_html=True)
 
-    # Collect all precomputed metrics
+    _NC_GROUPS_W = {"fock", "squeezed", "cat", "displaced_squeezed", "gkp"}
     all_states = []
     STATE_KEYS = [
         ("fock",0,"Fock |0⟩"),("fock",1,"Fock |1⟩"),("fock",2,"Fock |2⟩"),("fock",3,"Fock |3⟩"),
@@ -684,11 +698,12 @@ def page_witness_lab():
             continue
         m   = sd['metrics']
         wnv = sd.get('wnv', 0.0)
+        is_nc = (group in _NC_GROUPS_W) or (wnv > 0.001)
         all_states.append({
             "State": label, "⟨n⟩": m['mean_n'], "Purity": m['purity'],
             "Entropy": m['entropy'], "Mandel Q": m.get('mandel_Q', float('nan')),
             "Δx": m['delta_x'], "Δp": m['delta_p'], "ΔxΔp": m['heis_prod'],
-            "WNV": round(wnv, 5), "Non-classical": wnv > 0.001,
+            "WNV": round(wnv, 5), "Non-classical": is_nc,
         })
 
     df = pd.DataFrame(all_states)
@@ -700,9 +715,10 @@ def page_witness_lab():
         def color_nc(val):
             return "color: #a3e635; font-weight:700" if val else "color: #64748b"
         st.dataframe(
-            df.style.applymap(color_nc, subset=["Non-classical"])
+            df.style.map(color_nc, subset=["Non-classical"])
                     .format({"⟨n⟩":"{:.3f}","Purity":"{:.4f}","Entropy":"{:.4f}",
-                              "Mandel Q":"{:.4f}","Δx":"{:.4f}","Δp":"{:.4f}","ΔxΔp":"{:.4f}","WNV":"{:.5f}"}),
+                              "Mandel Q": lambda v: f"{v:.4f}" if v is not None and not (isinstance(v, float) and math.isnan(v)) else "—",
+                              "Δx":"{:.4f}","Δp":"{:.4f}","ΔxΔp":"{:.4f}","WNV":"{:.5f}"}),
             use_container_width=True, height=480,
         )
 
@@ -730,7 +746,6 @@ def page_witness_lab():
 
     with tab3:
         fig = go.Figure()
-        nc_mask = df["Non-classical"]
         for nc, color, label in [(True,"#f472b6","Non-classical"),(False,"#fbbf24","Classical")]:
             mask = df["Non-classical"]==nc
             sub  = df[mask]
@@ -838,8 +853,12 @@ def page_channel_simulator():
         snap_idx = [0, len(series)//2, len(series)-1]
         snap_cols = st.columns(3)
         for ci, si in enumerate(snap_idx):
-            sv = series[si]; pv = param[si]
-            W_np = np.array(sv["W"]); xv = np.array(xvec)
+            sv = series[si]
+            pv = param[si]
+            W_np = np.array(sv["W"], dtype=float)
+            xv   = np.array(xvec, dtype=float)
+            if W_np.ndim != 2:
+                continue
             wmin, wmax = _wigner_range(W_np)
             fig = go.Figure(go.Heatmap(z=W_np, x=xv, y=xv, colorscale=W_CS, zmin=wmin, zmax=wmax, showscale=False))
             fig.update_layout(
@@ -932,7 +951,7 @@ def page_gbs_sampler():
             sel_key = st.selectbox("**GBS configuration**", mode_options,
                                     format_func=lambda k: f"{'SF' if 'sf' in k else 'Analytic'} — {GD[k]['N_modes']} modes, r≈{GD[k]['r_vals'][0]:.2f}")
             gbs = GD[sel_key]
-            source_tag = "🍓 Strawberry Fields" if gbs.get('source')=='strawberryfields' else "📐 Analytic (SF not installed)"
+            source_tag = "🍓 Strawberry Fields (real simulation)" if gbs.get('source')=='strawberryfields' else "📐 Analytic GBS (exact Gaussian computation)"
             st.markdown(f"<span class='state-badge badge-classical' style='margin-bottom:10px;display:inline-block'>{source_tag}</span>", unsafe_allow_html=True)
 
             # Circuit diagram via plotly
