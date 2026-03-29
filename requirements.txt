@@ -1,26 +1,27 @@
 # ── CV Quantum Information Dashboard ── requirements.txt ──────────────────────
 # Generated for: m25iqt013 · IIT Jodhpur HPC + Streamlit Cloud
-# Python 3.10+  |  Pin ranges keep it reproducible yet flexible
+# Python 3.10+  |  Tested on Streamlit Cloud (linux/amd64)
 
 # ── Core scientific stack ─────────────────────────────────────────────────────
-numpy>=2.0,<3.0
-scipy>=1.13,<2.0
+numpy>=1.24,<2.0
+scipy>=1.11,<2.0
 
 # ── Quantum frameworks ────────────────────────────────────────────────────────
-qutip>=5.2,<6.0
+# NOTE: QuTiP 5.x requires numpy<2.0  — pinned above
+qutip>=5.0,<6.0
 
 # ── Visualization ─────────────────────────────────────────────────────────────
-matplotlib>=3.9,<4.0
-plotly>=5.22,<6.0
+matplotlib>=3.7,<4.0
+plotly>=5.18,<6.0
 
 # ── Dashboard ─────────────────────────────────────────────────────────────────
-streamlit>=1.36,<2.0
+streamlit>=1.32,<2.0
 
 # ── Data ─────────────────────────────────────────────────────────────────────
-pandas>=2.2,<3.0
+pandas>=2.0,<3.0
 
 # ── Optional: GBS (Page 5 full functionality) ─────────────────────────────────
-# Uncomment on HPC where these are installed via module load or pip install
+# Uncomment on HPC where these are available
 # strawberryfields>=0.23
 # thewalrus>=0.20
 # pennylane>=0.36
