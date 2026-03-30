@@ -524,33 +524,39 @@ def page_phase_space_zoo():
         cols[idx%ncol].plotly_chart(fig, use_container_width=True)
 
     # ── Scorecard ──
-    if show_score:
-        st.markdown("### 📊 Non-classicality Scorecard")
-        rows = []
-        for (grp,key,label) in ZOO_CONFIGS:
-            try: sd = SD[grp][key]
-            except: sd = list(SD[grp].values())[0]
-            m=sd["metrics"]; wnv=sd.get("wnv",0.0)
-            rows.append({"State":label,"⟨n⟩":m["mean_n"],"Purity":m["purity"],
-                "Entropy S(ρ)":m["entropy"],"Mandel Q":m.get("mandel_Q","—"),
-                "WNV":round(wnv,5),is_nonclassical = (wnv > 0.001) or (m.get("mandel_Q",0) != 0)
-                                    rows.append({
-                                        "State": label,
-                                        "⟨n⟩": m["mean_n"],
-                                        "Purity": m["purity"],
-                                        "Entropy S(ρ)": m["entropy"],
-                                        "Mandel Q": m.get("mandel_Q","—"),
-                                        "WNV": round(wnv,5),
-                                        "Non-classical": "✅" if is_nonclassical else "❌"
-                                    })
-                                    })
-        df=pd.DataFrame(rows)
-        st.dataframe(df,use_container_width=True,hide_index=True,height=320)
-        st.markdown("""<div class="insight"><div class="t">💡 Reading the table</div>
-        <p><b>WNV > 0</b> rigorously proves non-classicality.
-        <b>Mandel Q &lt; 0</b> = sub-Poissonian photon statistics.
-        <b>Purity = 1</b> = pure state. <b>Entropy = 0</b> = no classical uncertainty.</p>
-        </div>""", unsafe_allow_html=True)
+        if show_score:
+            st.markdown("### 📊 Non-classicality Scorecard")
+            rows = []
+            for (grp, key, label) in ZOO_CONFIGS:
+                try:
+                    sd = SD[grp][key]
+                except:
+                    sd = list(SD[grp].values())[0]
+        
+                m = sd["metrics"]
+                wnv = sd.get("wnv", 0.0)
+        
+                # Compute non-classicality before appending
+                is_nonclassical = (wnv > 0.001) or (m.get("mandel_Q", 0) != 0)
+        
+                rows.append({
+                    "State": label,
+                    "⟨n⟩": m["mean_n"],
+                    "Purity": m["purity"],
+                    "Entropy S(ρ)": m["entropy"],
+                    "Mandel Q": m.get("mandel_Q", "—"),
+                    "WNV": round(wnv, 5),
+                    "Non-classical": "✅" if is_nonclassical else "❌"
+                })
+        
+            df = pd.DataFrame(rows)
+            st.dataframe(df, use_container_width=True, hide_index=True, height=320)
+            st.markdown("""<div class="insight"><div class="t">💡 Reading the table</div>
+            <p><b>WNV > 0</b> rigorously proves non-classicality.
+            <b>Mandel Q &lt; 0</b> = sub-Poissonian photon statistics.
+            <b>Purity = 1</b> = pure state. <b>Entropy = 0</b> = no classical uncertainty.</p>
+            </div>""", unsafe_allow_html=True)
+
 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — WITNESS LAB
