@@ -503,8 +503,14 @@ def page_phase_space_zoo():
         if "Wigner" in rep:
             if wmin>=0: wmin=-1e-9
             if wmax<=0: wmax=1e-9
-        badge = "⚡ Non-cl." if wnv>0.001 else "☀️ Classical"
-        col = "rgba(244,114,182,0.9)" if wnv>0.001 else "rgba(251,191,36,0.9)"
+
+        # Decide badge and color
+        if wnv > 0.001 or "Disp-Sq" in label or "Squeezed" in label or "Cat" in label or "GKP" in label:
+            badge = "⚡ Non-cl."
+            col   = "rgba(244,114,182,0.9)"
+        else:
+            badge = "☀️ Classical"
+            col   = "rgba(251,191,36,0.9)"
 
         fig = go.Figure(go.Heatmap(z=arr,x=xvec,y=xvec,colorscale=cs,
             zmin=wmin,zmax=wmax,showscale=False,
