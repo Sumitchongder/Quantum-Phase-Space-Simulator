@@ -533,7 +533,17 @@ def page_phase_space_zoo():
             m=sd["metrics"]; wnv=sd.get("wnv",0.0)
             rows.append({"State":label,"⟨n⟩":m["mean_n"],"Purity":m["purity"],
                 "Entropy S(ρ)":m["entropy"],"Mandel Q":m.get("mandel_Q","—"),
-                "WNV":round(wnv,5),"Non-classical":"✅" if wnv>0.001 else "❌"})
+                "WNV":round(wnv,5),is_nonclassical = (wnv > 0.001) or (m.get("mandel_Q",0) != 0)
+                                    rows.append({
+                                        "State": label,
+                                        "⟨n⟩": m["mean_n"],
+                                        "Purity": m["purity"],
+                                        "Entropy S(ρ)": m["entropy"],
+                                        "Mandel Q": m.get("mandel_Q","—"),
+                                        "WNV": round(wnv,5),
+                                        "Non-classical": "✅" if is_nonclassical else "❌"
+                                    })
+                                    })
         df=pd.DataFrame(rows)
         st.dataframe(df,use_container_width=True,hide_index=True,height=320)
         st.markdown("""<div class="insight"><div class="t">💡 Reading the table</div>
