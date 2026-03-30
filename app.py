@@ -4,7 +4,7 @@ IIT Jodhpur · m25iqt013
 Zero heavy deps: only streamlit + plotly + numpy + pandas
 All quantum data from pre-computed data/*.pkl files
 """
-
+ 
 import pickle, math, os
 from pathlib import Path
 import numpy as np
@@ -12,14 +12,14 @@ import pandas as pd
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 import streamlit as st
-
+ 
 # ── Page config ───────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="CV Quantum Dashboard · IIT Jodhpur",
     page_icon="⚛️", layout="wide",
     initial_sidebar_state="expanded",
 )
-
+ 
 # ── CSS ───────────────────────────────────────────────────────────────────────
 st.markdown("""
 <style>
@@ -40,11 +40,11 @@ h1{font-size:2rem;font-weight:800;}
 h2{font-size:1.3rem;font-weight:700;color:var(--cyan);}
 h3{font-size:1rem;font-weight:600;color:var(--indigo);}
 p,li{font-family:var(--sans);font-size:0.87rem;}
-
+ 
 /* sidebar */
 [data-testid="stSidebar"] label{color:#94a3b8!important;font-family:var(--mono);font-size:0.73rem;}
 [data-testid="stSidebar"] p{font-size:0.73rem;color:var(--dim);}
-
+ 
 /* metrics */
 [data-testid="metric-container"]{
   background:linear-gradient(135deg,var(--bg2),var(--bg3));
@@ -52,7 +52,7 @@ p,li{font-family:var(--sans);font-size:0.87rem;}
 }
 [data-testid="stMetricValue"]{font-family:var(--mono);color:var(--cyan);font-size:1.15rem;font-weight:700;}
 [data-testid="stMetricLabel"]{color:var(--dim);font-size:0.68rem;font-family:var(--mono);}
-
+ 
 /* buttons */
 .stButton>button{
   background:linear-gradient(135deg,#312e81,var(--indigo));
@@ -61,18 +61,18 @@ p,li{font-family:var(--sans);font-size:0.87rem;}
   padding:8px 20px;letter-spacing:0.04em;transition:all .2s;
 }
 .stButton>button:hover{background:linear-gradient(135deg,var(--indigo),#818cf8);transform:translateY(-1px);}
-
+ 
 /* selectbox */
 [data-baseweb="select"]>div{background:var(--bg3)!important;border-color:var(--border)!important;border-radius:8px!important;font-family:var(--mono);font-size:0.78rem;}
-
+ 
 /* tabs */
 .stTabs [data-baseweb="tab-list"]{background:var(--bg2);border-bottom:2px solid var(--border);gap:2px;padding:0 4px;}
 .stTabs [data-baseweb="tab"]{color:var(--dim);font-family:var(--mono);font-size:0.75rem;padding:9px 14px;border-radius:8px 8px 0 0;}
 .stTabs [aria-selected="true"]{color:var(--indigo)!important;border-bottom:2px solid var(--indigo)!important;background:var(--bg3);}
-
+ 
 /* slider */
 .stSlider [data-testid="stThumb"]{background:var(--indigo)!important;}
-
+ 
 /* custom cards */
 .banner{
   background:linear-gradient(135deg,var(--bg2),var(--bg3));
@@ -89,25 +89,25 @@ p,li{font-family:var(--sans);font-size:0.87rem;}
 .tag{display:inline-block;background:var(--bg3);border:1px solid var(--border2);
   border-radius:20px;padding:2px 10px;font-size:0.68rem;font-family:var(--mono);
   color:var(--cyan);margin:4px 3px 0 0;}
-
+ 
 .eq{background:var(--bg2);border:1px solid var(--border);border-left:3px solid var(--indigo);
   border-radius:0 8px 8px 0;padding:10px 14px;margin:8px 0;
   font-family:var(--mono);font-size:0.8rem;color:#c7d2fe;line-height:1.6;}
-
+ 
 .insight{background:linear-gradient(135deg,rgba(34,211,238,.04),rgba(99,102,241,.04));
   border:1px solid rgba(34,211,238,.2);border-radius:10px;
   padding:12px 16px;margin:8px 0;}
 .insight .t{font-family:var(--mono);font-size:0.67rem;color:var(--cyan);
   text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px;}
 .insight p{margin:0;font-size:0.8rem;color:#94a3b8;}
-
+ 
 .warn{background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);
   border-radius:8px;padding:10px 14px;margin:6px 0;font-size:0.8rem;color:#fcd34d;}
-
+ 
 hr{border-color:var(--border);margin:.8rem 0;}
 </style>
 """, unsafe_allow_html=True)
-
+ 
 # ── Plotly theme ──────────────────────────────────────────────────────────────
 _L = dict(
     paper_bgcolor="#020817", plot_bgcolor="#060e24",
@@ -121,15 +121,15 @@ _L = dict(
     margin=dict(l=42, r=20, t=44, b=34),
     colorway=["#6366f1","#22d3ee","#f472b6","#a3e635","#fbbf24","#60a5fa","#fb923c"],
 )
-
+ 
 W_CS   = [[0,"#041030"],[.25,"#1e1b4b"],[.45,"#0f172a"],[.55,"#0f172a"],[.75,"#7f1d1d"],[1,"#db2777"]]
 W_CS2  = [[0,"#042f2e"],[.5,"#020817"],[1,"#0891b2"]]
 Q_CS   = [[0,"#020817"],[.35,"#1e1b4b"],[.65,"#6d28d9"],[.85,"#c026d3"],[1,"#fbbf24"]]
 DM_CS  = "RdBu_r"
-
+ 
 # ── Data loader ───────────────────────────────────────────────────────────────
 DATA_DIR = Path(__file__).parent / "data"
-
+ 
 @st.cache_resource(show_spinner=False)
 def load_all():
     out = {}
@@ -141,21 +141,21 @@ def load_all():
         else:
             out[name] = None
     return out
-
+ 
 DATA = load_all()
-
+ 
 def need(key):
     if DATA[key] is None:
         st.error(f"**`data/{key}.pkl` not found.** Place the pkl files in a `data/` folder next to `app.py`.")
         st.stop()
-
+ 
 # ── Figure helpers ────────────────────────────────────────────────────────────
 def _wr(W):
     wmin, wmax = float(W.min()), float(W.max())
     if wmin >= 0: wmin = -1e-9
     if wmax <= 0: wmax =  1e-9
     return wmin, wmax
-
+ 
 def fw(W, xv, title="W(x,p)", h=420, show3d=False):
     W = np.array(W); xv = np.array(xv)
     wmin, wmax = _wr(W)
@@ -185,7 +185,7 @@ def fw(W, xv, title="W(x,p)", h=420, show3d=False):
         title=dict(text=f"<b>{title}</b>",font=dict(size=13,color="#6366f1"),x=0.5),
         xaxis_title="x (position)", yaxis_title="p (momentum)")
     return fig
-
+ 
 def fq(Q, xv, title="Q(α)", h=420):
     fig = go.Figure(go.Heatmap(z=np.array(Q), x=np.array(xv), y=np.array(xv),
         colorscale=Q_CS,
@@ -195,7 +195,7 @@ def fq(Q, xv, title="Q(α)", h=420):
         title=dict(text=f"<b>{title}</b>",font=dict(size=13,color="#22d3ee"),x=0.5),
         xaxis_title="Re(α)", yaxis_title="Im(α)")
     return fig
-
+ 
 def fdm(rho, title="ρ", h=360):
     rho = np.array(rho)
     sub = make_subplots(1,2,subplot_titles=["Re(ρ)","Im(ρ)"],horizontal_spacing=0.07)
@@ -207,7 +207,60 @@ def fdm(rho, title="ρ", h=360):
     sub.update_layout(**_L,height=h,
         title=dict(text=f"<b>Density matrix {title}</b>",font=dict(size=12,color="#6366f1"),x=0.5))
     return sub
-
+ 
+# ── Density matrix reconstruction from photon probabilities ─────────────────
+def reconstruct_rho(sd, n_max=20):
+    """
+    Reconstruct density matrix from pkl data.
+    - If rho stored directly: use it.
+    - Pure states (purity≈1): rho_mn = sqrt(P(m)*P(n)) * phase_correction
+    - Mixed states: rho = diag(P(n))  [only diagonal available]
+    - Special: cat states have alternating-sign coherences
+    - Special: thermal is purely diagonal (classical mixture)
+    """
+    if "rho" in sd:
+        return np.array(sd["rho"])
+    
+    m   = sd["metrics"]
+    probs = np.array(m["probs"][:n_max], dtype=float)
+    purity = m.get("purity", 0.0)
+    
+    # Detect state type from structure of probs
+    # Squeezed vacuum: only even Fock components non-zero
+    # Cat even: only even components
+    # Cat odd: only odd components
+    probs_safe = np.maximum(probs, 0)
+ 
+    # Normalise to account for truncation at n=29 (high-r squeezed, high-nbar thermal)
+    total = probs_safe.sum()
+    if total > 1e-10:
+        probs_safe = probs_safe / total
+ 
+    if purity > 0.98:
+        # Pure state: rho_mn = psi_m * psi_n^*
+        odd_sum  = probs_safe[1::2].sum()
+        even_sum = probs_safe[0::2].sum()
+        psi = np.sqrt(probs_safe)
+ 
+        if odd_sum > 0.98 and even_sum < 0.02:
+            # Odd cat: only odd Fock components non-zero
+            psi[0::2] = 0
+        elif even_sum > 0.98 and odd_sum < 0.02:
+            # Even cat / squeezed vacuum: only even Fock components non-zero
+            psi[1::2] = 0
+        # else: general pure state (displaced-squeezed, GKP, etc.)
+ 
+        rho = np.outer(psi, psi)
+    else:
+        # Mixed state: only diagonal available (no phase coherence)
+        rho = np.diag(probs_safe)
+ 
+    # Final safety: ensure Tr(rho)=1
+    tr = float(np.trace(rho))
+    if tr > 1e-10:
+        rho = rho / tr
+    return rho
+ 
 def fpn(probs, mean_n, title="P(n)", h=320):
     probs = np.array(probs); k = np.arange(len(probs))
     poi = np.array([math.exp(-max(mean_n,1e-9))*(max(mean_n,1e-9)**ki)/math.factorial(int(ki))
@@ -221,7 +274,7 @@ def fpn(probs, mean_n, title="P(n)", h=320):
         title=dict(text=f"<b>{title}</b>",font=dict(size=12,color="#6366f1"),x=0.5),
         xaxis_title="Photon number n",yaxis_title="P(n)",bargap=0.15)
     return fig
-
+ 
 def mrow(m, wnv):
     cols = st.columns(6)
     vals = [
@@ -234,7 +287,7 @@ def mrow(m, wnv):
     ]
     for col,(lbl,val,hlp) in zip(cols,vals):
         col.metric(lbl, "—" if val is None else str(val), help=hlp)
-
+ 
 # ── Sidebar ───────────────────────────────────────────────────────────────────
 def sidebar():
     st.sidebar.markdown("""
@@ -247,7 +300,7 @@ def sidebar():
     </div>
     <hr style="border-color:#1a2d5a;margin:8px 0 14px">
     """, unsafe_allow_html=True)
-
+ 
     page = st.sidebar.radio("NAVIGATE", [
         "🔬 State Explorer",
         "🌌 Phase Space Zoo",
@@ -255,7 +308,7 @@ def sidebar():
         "⚡ Channel Simulator",
         "🔭 GBS & CV-QML",
     ])
-
+ 
     st.sidebar.markdown("<hr style='border-color:#1a2d5a;margin:12px 0'>", unsafe_allow_html=True)
     st.sidebar.markdown("""
     <div style="font-family:'Space Mono',monospace;font-size:0.62rem;
@@ -265,7 +318,7 @@ def sidebar():
     © 2025 m25iqt013
     </div>""", unsafe_allow_html=True)
     return page
-
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 1 — STATE EXPLORER
 # ════════════════════════════════════════════════════════════════════════════════
@@ -320,12 +373,12 @@ STATE_META = {
                "The leading approach for photonic <b>quantum error correction</b>.",
     },
 }
-
+ 
 def page_state_explorer():
     need("states")
     SD = DATA["states"]
     xvec = SD["xvec"]
-
+ 
     st.markdown("""
     <div class="banner">
       <h1>🔬 State Explorer</h1>
@@ -334,15 +387,15 @@ def page_state_explorer():
       <span class="tag">Density matrix ρ</span><span class="tag">Photon dist.</span>
       <span class="tag">8 quantum states</span>
     </div>""", unsafe_allow_html=True)
-
+ 
     # ── Controls ──
     col_c, col_m = st.columns([1, 3.2], gap="medium")
-
+ 
     with col_c:
         st.markdown("### ⚙️ Controls")
         state_type = st.selectbox("**Quantum State**", list(STATE_META.keys()), key="se_state")
         meta = STATE_META[state_type]
-
+ 
         # State-specific selector
         st.markdown("**Preset:**")
         if state_type == "Fock |n⟩":
@@ -355,45 +408,45 @@ def page_state_explorer():
                 meta["classical"] = True
                 meta["emoji"] = "⭕" # Optional: distinct emoji for vacuum
                 meta["desc"] = "The <b>Vacuum State</b> |0⟩ is the lowest energy state. It is technically a Fock state but is Gaussian and purely classical."
-
+ 
         elif state_type == "Coherent |α⟩":
             alpha_opts = {"α=0 (vacuum)":"0,0","α=1":"1,0","α=2":"2,0",
                           "α=1+i":"1,1","α=2+2i":"2,2","α=−2":"−2,0","α=2i":"0,2"}
             sel = st.selectbox("Amplitude α", list(alpha_opts.keys()), key="se_coh")
             grp, key = "coherent", alpha_opts[sel]
-
+ 
         elif state_type == "Squeezed |r,φ⟩":
             sq_opts = {"r=0.5, φ=0":"0.5,0","r=1.0, φ=0":"1.0,0","r=1.5, φ=0":"1.5,0",
                        "r=2.0, φ=0":"2.0,0","r=1.0, φ=π/2":"1.0,1.57"}
             sel = st.selectbox("Squeezing (r, φ)", list(sq_opts.keys()), key="se_sq")
             grp, key = "squeezed", sq_opts[sel]
-
+ 
         elif state_type == "Thermal ρ_th":
             nbar_opts = {"n̄=0.5":0.5,"n̄=1":1,"n̄=2":2,"n̄=5":5,"n̄=10":10}
             sel = st.selectbox("Mean photon number n̄", list(nbar_opts.keys()), key="se_th")
             grp, key = "thermal", nbar_opts[sel]
-
+ 
         elif state_type == "Cat State":
             cat_opts = {"Even cat |α|=1.5":"even","Odd cat |α|=1.5":"odd",
                         "Even cat |α|=2.0":"even_2","Odd cat |α|=2.0":"odd_2"}
             sel = st.selectbox("Cat type", list(cat_opts.keys()), key="se_cat")
             grp, key = "cat", cat_opts[sel]
-
+ 
         elif state_type == "Displaced-Squeezed":
             ds_opts = {"α=1+i, r=0.5":"(1+1j),0.5,0",
                        "α=2, r=1.0":"(2+0j),1.0,0",
                        "α=1+2i, r=0.8, φ=π/2":"(1+2j),0.8,1.57"}
             sel = st.selectbox("Parameters (α, r, φ)", list(ds_opts.keys()), key="se_ds")
             grp, key = "displaced_squeezed", ds_opts[sel]
-
+ 
         else:  # GKP
             gkp_opts = {"δ=0.3 (sharp)":"0.3,3","δ=0.5 (broad)":"0.5,3"}
             sel = st.selectbox("Envelope δ", list(gkp_opts.keys()), key="se_gkp")
             grp, key = "gkp", gkp_opts[sel]
-
+ 
         view3d = st.checkbox("🏔️ 3D Wigner surface", value=False, key="se_3d")
         show_dm = st.checkbox("🔢 Show density matrix", value=True, key="se_dm")
-
+ 
         # Info card
         cl_txt  = "☀️ CLASSICAL" if meta["classical"] else "⚡ NON-CLASSICAL"
         cl_col  = "#fbbf24" if meta["classical"] else "#f472b6"
@@ -407,28 +460,28 @@ def page_state_explorer():
         </div>
         <div class="eq" style="margin-top:8px">{meta['eq']}</div>
         """, unsafe_allow_html=True)
-
+ 
     # ── Load data ──
     try:
         sd = SD[grp][key]
     except KeyError:
         sd = list(SD[grp].values())[0]
-
+ 
     m   = sd["metrics"]
     wnv = sd.get("wnv", 0.0)
-
+ 
     with col_m:
         mrow(m, wnv)
         st.markdown("<hr>", unsafe_allow_html=True)
-
+ 
         tab1, tab2, tab3, tab4 = st.tabs([
             "🌊 Wigner W(x,p)", "🌀 Husimi Q(α)",
             "📊 Photon dist.", "📐 Density matrix"])
-
+ 
         with tab1:
             st.plotly_chart(fw(sd["W"], xvec, f"Wigner — {state_type}", h=440, show3d=view3d),
                             use_container_width=True)
-
+ 
             neg = f"{wnv:.5f}" if wnv>0.001 else "≈ 0"
             is_nonclassical = (wnv > 0.001) or (not meta["classical"])
             
@@ -439,8 +492,8 @@ def page_state_explorer():
             Wigner Negativity Volume = <b>{neg}</b>.
             {'This state is <b>non-classical</b> ✅' if is_nonclassical else 'This state is <b>classical</b> ❌'}
             </p></div>""", unsafe_allow_html=True)
-
-
+ 
+ 
         with tab2:
             st.plotly_chart(fq(sd["Q"], xvec, f"Husimi Q — {state_type}", h=440),
                             use_container_width=True)
@@ -448,7 +501,7 @@ def page_state_explorer():
             <p>Q(α) = ⟨α|ρ|α⟩/π — always non-negative (smoother than Wigner).
             Brighter = more likely to find the state at that phase-space point.
             Measured via heterodyne detection.</p></div>""", unsafe_allow_html=True)
-
+ 
         with tab3:
             st.plotly_chart(fpn(m["probs"], m["mean_n"], f"P(n) — {state_type}", h=360),
                             use_container_width=True)
@@ -460,19 +513,53 @@ def page_state_explorer():
                 Yellow dashed = Poisson reference (coherent state).
                 Q &lt; 0 means fewer fluctuations than a laser — quantum signature.</p></div>""",
                 unsafe_allow_html=True)
-
+ 
         with tab4:
-            if show_dm and "rho" in sd:
-                st.plotly_chart(fdm(sd["rho"], f"— {state_type}", h=360), use_container_width=True)
-                st.markdown("""<div class="insight"><div class="t">💡 Density matrix ρ</div>
-                <p>Diagonal = photon-number probabilities P(n).
-                Off-diagonal coherences = quantum superposition signature.
-                Pure states: Tr(ρ²)=1. Mixed states: Tr(ρ²) &lt; 1.</p></div>""",
+            if show_dm:
+                rho_arr = reconstruct_rho(sd, n_max=20)
+                is_stored = "rho" in sd
+                is_pure   = m.get("purity", 0) > 0.98
+                is_mixed  = not is_pure
+ 
+                # Source note
+                if is_stored:
+                    src_note = "✅ Exact density matrix (stored in pkl)"
+                    src_col  = "#a3e635"
+                elif is_pure:
+                    src_note = "🔄 Reconstructed from P(n) — pure state: ρ_mn = √(P(m)·P(n))"
+                    src_col  = "#22d3ee"
+                else:
+                    src_note = "🔄 Reconstructed: diagonal only (mixed state — off-diagonals not stored)"
+                    src_col  = "#fbbf24"
+ 
+                st.markdown(f'<div style="font-family:var(--mono);font-size:0.7rem;color:{src_col};'
+                            f'margin-bottom:8px;padding:6px 10px;background:rgba(0,0,0,0.3);'
+                            f'border-radius:6px">{src_note}</div>', unsafe_allow_html=True)
+ 
+                st.plotly_chart(fdm(rho_arr.tolist(), f"— {state_type}", h=380),
+                                use_container_width=True)
+ 
+                # Metrics below
+                tr_rho2 = float(np.trace(rho_arr @ rho_arr))
+                c1dm, c2dm, c3dm = st.columns(3)
+                c1dm.metric("Tr(ρ²) reconstructed", f"{tr_rho2:.4f}", help="Should equal purity")
+                c2dm.metric("Tr(ρ) check", f"{float(np.trace(rho_arr)):.4f}", help="Should be 1.0")
+                c3dm.metric("Max |ρ_mn|", f"{float(np.max(np.abs(rho_arr))):.4f}", help="Largest matrix element")
+ 
+                if is_pure:
+                    ptype = "pure"
+                    coh_msg = ("Off-diagonal elements ρ_mn = √(P(m)·P(n)) show <b>quantum coherence</b> — "
+                               "the hallmark of a pure superposition state.")
+                else:
+                    ptype = "mixed"
+                    coh_msg = ("Only diagonal P(n) shown — mixed states have no phase coherence between "
+                               "Fock components. This is <b>classical statistical mixture</b>, not superposition.")
+ 
+                st.markdown(f"""<div class="insight"><div class="t">💡 Density matrix ρ — {ptype} state</div>
+                <p>Diagonal elements = photon-number probabilities P(n). {coh_msg}
+                Pure states: Tr(ρ²)=1 &nbsp;|&nbsp; Mixed states: Tr(ρ²) &lt; 1.</p></div>""",
                 unsafe_allow_html=True)
-            elif "rho" not in sd:
-                st.markdown('<div class="warn">⚠️ Density matrix not stored for this state to save memory. Available for Fock and Coherent states.</div>',
-                            unsafe_allow_html=True)
-
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 2 — PHASE SPACE ZOO
 # ════════════════════════════════════════════════════════════════════════════════
@@ -482,11 +569,11 @@ ZOO_CONFIGS = [
     ("thermal",1,"Thermal n̄=1"),("cat","even","Cat (even)"),
     ("displaced_squeezed","(1+1j),0.5,0","Disp-Sq"),("gkp","0.3,3","GKP δ=0.3"),
 ]
-
+ 
 def page_phase_space_zoo():
     need("states")
     SD = DATA["states"]; xvec = np.array(SD["xvec"])
-
+ 
     st.markdown("""
     <div class="banner">
       <h1>🌌 Phase Space Zoo</h1>
@@ -494,19 +581,19 @@ def page_phase_space_zoo():
       <span class="tag">Side-by-side grid</span><span class="tag">Non-classicality</span>
       <span class="tag">Wigner · Husimi Q</span>
     </div>""", unsafe_allow_html=True)
-
+ 
     c1, c2 = st.columns([1,3])
     with c1:
         rep  = st.radio("**Representation**", ["Wigner W(x,p)","Husimi Q(α)"], key="zoo_rep")
         ncol = st.radio("**Grid columns**", [2,4], index=1, horizontal=True, key="zoo_cols")
         show_score = st.checkbox("Show scorecard table", value=True, key="zoo_tbl")
-
+ 
     # ── Grid ──
     cols = st.columns(ncol)
     for idx,(grp,key,label) in enumerate(ZOO_CONFIGS):
         try: sd = SD[grp][key]
         except KeyError: sd = list(SD[grp].values())[0]
-
+ 
         wnv   = sd.get("wnv",0.0)
         arr   = np.array(sd["W"] if "Wigner" in rep else sd["Q"])
         cs    = W_CS if "Wigner" in rep else Q_CS
@@ -514,7 +601,7 @@ def page_phase_space_zoo():
         if "Wigner" in rep:
             if wmin>=0: wmin=-1e-9
             if wmax<=0: wmax=1e-9
-
+ 
         # Decide badge and color
         if wnv > 0.001 or "Disp-Sq" in label or "Squeezed" in label or "Cat" in label or "GKP" in label:
             badge = "⚡ Non-cl."
@@ -522,7 +609,7 @@ def page_phase_space_zoo():
         else:
             badge = "☀️ Classical"
             col   = "rgba(251,191,36,0.9)"
-
+ 
         fig = go.Figure(go.Heatmap(z=arr,x=xvec,y=xvec,colorscale=cs,
             zmin=wmin,zmax=wmax,showscale=False,
             hovertemplate=f"{label}<br>x=%{{x:.1f}} p=%{{y:.1f}} val=%{{z:.3f}}<extra></extra>"))
@@ -539,7 +626,7 @@ def page_phase_space_zoo():
                        font=dict(size=11,color="#e2e8f0"),x=0.5),
             margin=dict(l=28,r=6,t=46,b=22),height=240)
         cols[idx%ncol].plotly_chart(fig, use_container_width=True)
-
+ 
     # ── Scorecard ──
     if show_score:
         st.markdown("### 📊 Non-classicality Scorecard")
@@ -588,9 +675,9 @@ def page_phase_space_zoo():
         Thermal, coherent, and vacuum states are classical mixtures even if Mandel Q ≥ 0.<br>
         Displaced squeezed, squeezed, cat, and GKP states are always non-classical.</p>
         </div>""", unsafe_allow_html=True)
-
-
-
+ 
+ 
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 3 — WITNESS LAB
 # ════════════════════════════════════════════════════════════════════════════════
@@ -608,11 +695,11 @@ ALL_STATES_WIT = [
     ("displaced_squeezed","(2+0j),1.0,0","DispSq α=2,r=1"),
     ("gkp","0.3,3","GKP δ=0.3"),("gkp","0.5,3","GKP δ=0.5"),
 ]
-
+ 
 def page_witness_lab():
     need("states")
     SD = DATA["states"]
-
+ 
     st.markdown("""
     <div class="banner">
       <h1>🧪 Witness Lab</h1>
@@ -620,21 +707,33 @@ def page_witness_lab():
       <span class="tag">Wigner negativity</span><span class="tag">Purity vs Entropy</span>
       <span class="tag">Heisenberg</span><span class="tag">Mandel Q</span>
     </div>""", unsafe_allow_html=True)
-
+ 
     # Build dataframe
     rows=[]
     for grp,key,label in ALL_STATES_WIT:
         try: sd=SD[grp][key]
         except: continue
         m=sd["metrics"]; wnv=sd.get("wnv",0.0)
+        # Determine P-function classicality
+        P_CLASS = {
+            "fock":              "Singular (∂²ⁿδ/∂α*ⁿ∂αⁿ) — non-classical",
+            "coherent":          "δ²(α−α₀) — classical ✅",
+            "squeezed":          "Singular / negative — non-classical",
+            "thermal":           "Gaussian ≥ 0 — classical ✅",
+            "cat":               "Highly singular — non-classical",
+            "displaced_squeezed":"Singular — non-classical",
+            "gkp":               "Comb of singularities — non-classical",
+        }
+        p_func = P_CLASS.get(grp, "Unknown")
+ 
         rows.append({"State":label,"⟨n⟩":m["mean_n"],"Purity":m["purity"],
             "Entropy":m["entropy"],"Mandel Q":m.get("mandel_Q",float("nan")),
             "Δx":m["delta_x"],"Δp":m["delta_p"],"ΔxΔp":m["heis_prod"],
-            "WNV":round(wnv,5),"NC":wnv>0.001})
+            "WNV":round(wnv,5),"P-function":p_func,"NC":wnv>0.001})
     df=pd.DataFrame(rows)
-
-    tab1,tab2,tab3,tab4=st.tabs(["📋 Full table","🌊 WNV bars","🔭 Purity vs Entropy","⚖️ Heisenberg"])
-
+ 
+    tab1,tab2,tab3,tab4,tab5=st.tabs(["📋 Full table","🌊 WNV bars","🔭 Purity vs Entropy","⚖️ Heisenberg","🔮 P-function"])
+ 
     with tab1:
         filter_nc = st.checkbox("Show only non-classical states", key="wit_nc")
         dff = df[df["NC"]] if filter_nc else df
@@ -645,7 +744,20 @@ def page_witness_lab():
                                "Mandel Q":"{:.4f}","Δx":"{:.4f}","Δp":"{:.4f}",
                                "ΔxΔp":"{:.4f}","WNV":"{:.5f}"}),
             use_container_width=True, height=480)
-
+        
+        # P-function explanation card
+        st.markdown("""<div class="insight" style="margin-top:8px">
+        <div class="t">💡 Glauber-Sudarshan P-function as a non-classicality witness</div>
+        <p>The P-function ρ = ∫P(α)|α⟩⟨α|d²α is the most sensitive non-classicality witness:
+        <b>If P(α) is a non-negative regular function → state is CLASSICAL.</b>
+        Any negativity or singularity (more singular than a Dirac delta) → <b>NON-CLASSICAL</b>.<br>
+        • <b>Coherent</b>: P = δ²(α−α₀) — delta function, non-negative → classical<br>
+        • <b>Thermal</b>: P = Gaussian ≥ 0 → classical<br>
+        • <b>Fock</b>: P involves derivatives of delta → singular → non-classical<br>
+        • <b>Squeezed/Cat/GKP</b>: P is negative or highly singular → non-classical<br>
+        Hudson's theorem: W(x,p) ≥ 0 everywhere ⟺ P is a non-negative Gaussian (coherent/thermal only).
+        </p></div>""", unsafe_allow_html=True)
+ 
     with tab2:
         sort_by = st.radio("Sort by", ["WNV (default)","State name"], horizontal=True, key="wit_sort")
         dfs = df.sort_values("WNV",ascending=False) if "WNV" in sort_by else df.sort_values("State")
@@ -661,7 +773,7 @@ def page_witness_lab():
         st.markdown("""<div class="insight"><div class="t">💡 WNV</div>
         <p>WNV = ∫|W(x,p)|dxdp − 1. Any WNV > 0 proves non-classicality (Hudson's theorem).
         Coherent and thermal states have WNV = 0 by definition.</p></div>""",unsafe_allow_html=True)
-
+ 
     with tab3:
         grp_sel = st.multiselect("Highlight groups",
             ["fock","coherent","squeezed","thermal","cat","displaced_squeezed","gkp"],
@@ -691,7 +803,7 @@ def page_witness_lab():
                        font=dict(size=13,color="#6366f1"),x=0.5),
             xaxis_title="Purity Tr(ρ²)",yaxis_title="Entropy S(ρ) [bits]")
         st.plotly_chart(fig,use_container_width=True)
-
+ 
     with tab4:
         fig=go.Figure()
         fig.add_trace(go.Bar(x=df["State"],y=df["ΔxΔp"],
@@ -711,7 +823,126 @@ def page_witness_lab():
         Minimum uncertainty (= ½): Coherent states, Squeezed states (along squeezed axis)<br>
         Thermal / mixed states: Δx·Δp > ½  (excess classical noise)
         </div>""",unsafe_allow_html=True)
-
+ 
+    with tab5:
+        st.markdown("### 🔮 Glauber-Sudarshan P-function Witness")
+        st.markdown("""<div class="eq">
+        ρ = ∫ P(α)|α⟩⟨α| d²α  — P-representation<br>
+        Classical state ⟺  P(α) ≥ 0 everywhere and regular<br>
+        Non-classical state ⟺  P(α) &lt; 0  OR  more singular than δ²(α)<br>
+        Hudson's theorem:  W(x,p) ≥ 0 ⟺ state is Gaussian (coherent or thermal)
+        </div>""", unsafe_allow_html=True)
+ 
+        # P-function classification chart
+        P_LABELS = {
+            "coherent":           ("Classical ✅", "#fbbf24", "δ²(α−α₀) — Delta function (non-negative)"),
+            "thermal":            ("Classical ✅", "#fb923c", "Gaussian ≥ 0 (non-negative)"),
+            "fock":               ("Non-classical ⚡", "#f472b6", "Derivatives of δ — singular"),
+            "squeezed":           ("Non-classical ⚡", "#6366f1", "Squeezed Gaussian — P < 0 in some region"),
+            "cat":                ("Non-classical ⚡", "#a3e635", "Sum of singular terms with interference"),
+            "displaced_squeezed": ("Non-classical ⚡", "#22d3ee", "Shifted singular Gaussian with P < 0"),
+            "gkp":                ("Non-classical ⚡", "#c084fc", "Comb of singularities"),
+        }
+        
+        # Visual: two-column layout
+        cl_grps  = ["coherent","thermal"]
+        ncl_grps = ["fock","squeezed","cat","displaced_squeezed","gkp"]
+ 
+        col_cl, col_ncl = st.columns(2)
+        with col_cl:
+            st.markdown("#### ☀️ Classical states (P ≥ 0)")
+            for g in cl_grps:
+                lbl, col, desc = P_LABELS[g]
+                st.markdown(f"""
+                <div style="background:rgba(251,191,36,0.08);border:1px solid rgba(251,191,36,0.3);
+                            border-radius:10px;padding:12px 14px;margin:8px 0">
+                  <div style="font-family:var(--mono);font-size:0.7rem;color:{col};font-weight:700">{g.upper()}</div>
+                  <div style="font-size:0.78rem;color:#94a3b8;white-space:pre-line;margin-top:4px">{desc}</div>
+                </div>""", unsafe_allow_html=True)
+        with col_ncl:
+            st.markdown("#### ⚡ Non-classical states (P singular or negative)")
+            for g in ncl_grps:
+                lbl, col, desc = P_LABELS[g]
+                st.markdown(f"""
+                <div style="background:rgba(244,114,182,0.06);border:1px solid rgba(244,114,182,0.25);
+                            border-radius:10px;padding:12px 14px;margin:8px 0">
+                  <div style="font-family:var(--mono);font-size:0.7rem;color:{col};font-weight:700">{g.upper()}</div>
+                  <div style="font-size:0.78rem;color:#94a3b8;white-space:pre-line;margin-top:4px">{desc}</div>
+                </div>""", unsafe_allow_html=True)
+ 
+        # Summary bar chart: P-function classicality score
+        st.markdown("#### Classicality comparison across all states")
+        # We use WNV as proxy — P-nonclassical <=> WNV > 0 for pure states
+        # For thermal we need a different score  
+        p_rows = []
+        for grp, key, label in ALL_STATES_WIT:
+            try: sd=DATA["states"][grp][key]
+            except: continue
+            wnv=sd.get("wnv",0.0)
+            is_classical = (grp in ["coherent","thermal"])
+            p_rows.append({"State":label,"P-classical":is_classical,
+                           "WNV":round(wnv,5),
+                           "P-function type":P_LABELS.get(grp,("?","#fff","?"))[2].replace("\n"," ")})
+        df_p = pd.DataFrame(p_rows)
+        
+        fig_p = go.Figure()
+        for is_cl, color, name in [(True,"#fbbf24","P ≥ 0 (classical)"),(False,"#f472b6","P singular/negative (non-classical)")]:
+            mask = df_p["P-classical"]==is_cl
+            sub  = df_p[mask]
+            fig_p.add_trace(go.Bar(
+                x=sub["State"], y=sub["WNV"],
+                name=name, marker_color=color, opacity=0.85,
+                text=[f"{v:.4f}" for v in sub["WNV"]],
+                textposition="outside", textfont=dict(size=7)))
+        fig_p.add_hline(y=0, line_color="white", line_dash="dash", line_width=1)
+        fig_p.update_layout(**_L, height=380,
+            title=dict(text="<b>WNV coloured by P-function classicality</b>",
+                       font=dict(size=13,color="#6366f1"),x=0.5),
+            xaxis_tickangle=-45, xaxis_title="", yaxis_title="WNV",
+            barmode="group")
+        st.plotly_chart(fig_p, use_container_width=True)
+ 
+        # Analytic P-function plots for thermal and coherent (the two tractable cases)
+        st.markdown("#### Analytic P-functions for tractable cases")
+        alpha_grid = np.linspace(-4,4,200)
+        X,Y = np.meshgrid(alpha_grid,alpha_grid)
+        Z_abs = X**2+Y**2
+ 
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            nbar_p = st.slider("Thermal n̄", 0.5, 5.0, 1.0, 0.5, key="p_nbar")
+            P_th = np.exp(-Z_abs/nbar_p)/(np.pi*nbar_p)
+            fig_pth = go.Figure(go.Heatmap(z=P_th,x=alpha_grid,y=alpha_grid,
+                colorscale=Q_CS,
+                colorbar=dict(title="P(α)",len=0.8,thickness=11,tickfont=dict(size=8,color="#e2e8f0")),
+                hovertemplate="Re(α)=%{x:.2f}  Im(α)=%{y:.2f}  P=%{z:.4f}<extra></extra>"))
+            fig_pth.update_layout(**_L,height=320,
+                title=dict(text=f"<b>Thermal P(α) — n̄={nbar_p:.1f}</b>",
+                           font=dict(size=12,color="#fbbf24"),x=0.5),
+                xaxis_title="Re(α)",yaxis_title="Im(α)")
+            st.plotly_chart(fig_pth,use_container_width=True)
+            st.markdown('<div class="eq">P_th(α) = (1/πn̄)·exp(−|α|²/n̄) ≥ 0 always → CLASSICAL</div>',
+                        unsafe_allow_html=True)
+ 
+        with col_p2:
+            alpha0_re = st.slider("Coherent Re(α₀)", -2.0, 2.0, 1.0, 0.5, key="p_re")
+            alpha0_im = st.slider("Coherent Im(α₀)", -2.0, 2.0, 0.0, 0.5, key="p_im")
+            # Regularised coherent P: approximate delta with narrow Gaussian
+            sigma2 = 0.04
+            P_coh = np.exp(-((X-alpha0_re)**2+(Y-alpha0_im)**2)/sigma2)/(np.pi*sigma2)
+            P_coh /= P_coh.max()
+            fig_pcoh = go.Figure(go.Heatmap(z=P_coh,x=alpha_grid,y=alpha_grid,
+                colorscale=Q_CS,
+                colorbar=dict(title="P(α)",len=0.8,thickness=11,tickfont=dict(size=8,color="#e2e8f0")),
+                hovertemplate="Re(α)=%{x:.2f}  Im(α)=%{y:.2f}  P=%{z:.4f}<extra></extra>"))
+            fig_pcoh.update_layout(**_L,height=320,
+                title=dict(text=f"<b>Coherent P(α) — regularised δ² at α₀={alpha0_re:.1f}+{alpha0_im:.1f}i</b>",
+                           font=dict(size=11,color="#fbbf24"),x=0.5),
+                xaxis_title="Re(α)",yaxis_title="Im(α)")
+            st.plotly_chart(fig_pcoh,use_container_width=True)
+            st.markdown('<div class="eq">P_coh(α) = δ²(α−α₀)  [regularised Gaussian shown] → CLASSICAL</div>',
+                        unsafe_allow_html=True)
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 4 — CHANNEL SIMULATOR
 # ════════════════════════════════════════════════════════════════════════════════
@@ -741,11 +972,11 @@ CHANNEL_THEORY = {
         "key":"loss_sweep","param":"gamma_t","label":"γt (loss)",
     },
 }
-
+ 
 def page_channel_simulator():
     need("channels")
     CD = DATA["channels"]; xvec = CD["xvec"]
-
+ 
     st.markdown("""
     <div class="banner">
       <h1>⚡ Channel Simulator</h1>
@@ -753,15 +984,15 @@ def page_channel_simulator():
       <span class="tag">Displacement D(α)</span><span class="tag">Squeezing S(r)</span>
       <span class="tag">Phase shift R(φ)</span><span class="tag">Loss (Lindblad)</span>
     </div>""", unsafe_allow_html=True)
-
+ 
     # Sidebar controls
     csel = st.selectbox("**Select channel**", list(CHANNEL_THEORY.keys()), key="ch_sel")
     info = CHANNEL_THEORY[csel]
     series = CD[info["key"]]
     params = [s[info["param"]] for s in series]
-
+ 
     tab1,tab2 = st.tabs(["🌊 Wigner evolution","📊 Metrics evolution"])
-
+ 
     with tab1:
         c1,c2 = st.columns([1,3])
         with c1:
@@ -776,7 +1007,7 @@ def page_channel_simulator():
         with c2:
             st.plotly_chart(fw(s["W"],xvec,f"{csel.split('(')[0].strip()}  [{info['param']}={pv:.3f}]",h=460),
                             use_container_width=True)
-
+ 
         # Snapshots row
         st.markdown("**Evolution snapshots (start → mid → end):**")
         scols = st.columns(len(series))
@@ -790,13 +1021,13 @@ def page_channel_simulator():
                 title=dict(text=f"<b>{pv2:.2f}</b>",font=dict(size=10,color="#22d3ee"),x=0.5),
                 margin=dict(l=4,r=4,t=28,b=4),height=160)
             scols[ci].plotly_chart(fig,use_container_width=True)
-
+ 
     with tab2:
         purs   = [s["metrics"]["purity"]  for s in series]
         ents   = [s["metrics"]["entropy"] for s in series]
         mns    = [s["metrics"]["mean_n"]  for s in series]
         heisps = [s["metrics"]["heis_prod"] for s in series]
-
+ 
         fig=make_subplots(2,2,subplot_titles=["Purity Tr(ρ²)","von Neumann Entropy",
                                                "Mean photons ⟨n⟩","Heisenberg Δx·Δp"])
         for (ri,ci),ys,col,nm in [
@@ -810,14 +1041,14 @@ def page_channel_simulator():
             title=dict(text=f"<b>Metrics vs {info['label']}</b>",
                        font=dict(size=13,color="#6366f1"),x=0.5))
         st.plotly_chart(fig,use_container_width=True)
-
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # PAGE 5 — GBS & CV-QML
 # ════════════════════════════════════════════════════════════════════════════════
 def page_gbs():
     need("gbs")
     GD = DATA["gbs"]
-
+ 
     st.markdown("""
     <div class="banner">
       <h1>🔭 Gaussian Boson Sampling & CV-QML</h1>
@@ -825,11 +1056,11 @@ def page_gbs():
       <span class="tag">Strawberry Fields</span><span class="tag">Hafnian (#P-hard)</span>
       <span class="tag">PennyLane CV-QML</span><span class="tag">GBS quantum advantage</span>
     </div>""", unsafe_allow_html=True)
-
+ 
     tab1,tab2,tab3,tab4=st.tabs(["🔭 GBS Circuit","📊 Photon statistics","∑ Hafnian","🤖 CV-QML"])
-
+ 
     avail={k:v for k,v in GD.items() if isinstance(v,dict) and "mean_photons" in v}
-
+ 
     with tab1:
         c1,c2=st.columns([1,3])
         with c1:
@@ -850,7 +1081,7 @@ def page_gbs():
             P(S) ∝ |Haf(A_S)|² / s!√det(σ_Q)<br>
             Sampling = #P-hard classically!
             </div>""",unsafe_allow_html=True)
-
+ 
         with c2:
             # Circuit diagram
             xvec_sf=np.array(gbs["xvec"])
@@ -881,7 +1112,7 @@ def page_gbs():
                 title=dict(text=f"<b>GBS Circuit — {N} modes</b>",
                            font=dict(size=13,color="#6366f1"),x=0.5))
             st.plotly_chart(fig_c,use_container_width=True)
-
+ 
             # Wigner per mode
             n_show=min(N,4)
             st.markdown("**Wigner functions per mode:**")
@@ -898,11 +1129,11 @@ def page_gbs():
                     title=dict(text=f"<b>Mode {i}</b>",font=dict(size=10,color="#22d3ee"),x=0.5),
                     margin=dict(l=4,r=4,t=28,b=4),height=180)
                 wcols[i].plotly_chart(fig_wi,use_container_width=True)
-
+ 
     with tab2:
         c1,c2=st.columns(2)
         gbs0=GD[sel_key] if "sel_key" in dir() else GD[list(avail.keys())[0]]
-
+ 
         with c1:
             # Mean photons bar
             fig_mn=go.Figure(go.Bar(
@@ -914,7 +1145,7 @@ def page_gbs():
                 title=dict(text="<b>⟨n⟩ per mode</b>",font=dict(size=12,color="#6366f1"),x=0.5),
                 xaxis_title="Mode",yaxis_title="⟨n⟩")
             st.plotly_chart(fig_mn,use_container_width=True)
-
+ 
         with c2:
             # Mandel Q
             fig_mq=go.Figure(go.Bar(
@@ -927,7 +1158,7 @@ def page_gbs():
                 title=dict(text="<b>Mandel Q per mode</b>",font=dict(size=12,color="#fbbf24"),x=0.5),
                 xaxis_title="Mode",yaxis_title="Q")
             st.plotly_chart(fig_mq,use_container_width=True)
-
+ 
         # Photon number distribution
         pn=np.array(gbs0["photon_dist"]); ns=np.array(gbs0["photon_ns"])
         nbar=float(gbs0["mean_photons"][0])
@@ -946,7 +1177,7 @@ def page_gbs():
         The <b>joint</b> multi-mode distribution is what makes GBS hard to simulate — 
         its probability is |Haf(A_S)|², requiring exponential classical resources.</p>
         </div>""",unsafe_allow_html=True)
-
+ 
     with tab3:
         st.markdown("### Hafnian — the #P-hard engine of GBS")
         st.markdown("""<div class="eq">
@@ -954,7 +1185,7 @@ def page_gbs():
         P(S) = |Haf(A_S)|² / (s₁!·s₂!·… · √det(σ_Q))<br>
         Classical best: Ryser's algorithm O(2ⁿ·n²)  —  intractable for n≳50
         </div>""",unsafe_allow_html=True)
-
+ 
         c1,c2=st.columns(2)
         with c1:
             st.markdown("**Verification table (brute-force):**")
@@ -966,7 +1197,7 @@ def page_gbs():
             For a 2×2 identity: only one matching (0,1) → Haf = A₀₁ = 0 (off-diagonal).
             For 2×2 all-ones: Haf = 1. The hafnian generalises the permanent to symmetric matrices.</p>
             </div>""",unsafe_allow_html=True)
-
+ 
         with c2:
             # Pick any GBS config that has hafnian data
             gbs_h=GD[list(avail.keys())[0]]
@@ -984,7 +1215,7 @@ def page_gbs():
                            font=dict(size=12,color="#6366f1"),x=0.5),
                 xaxis_title="n (matrix size)",yaxis_title="Operations (log scale)")
             st.plotly_chart(fig_haf,use_container_width=True)
-
+ 
         # Squeezing vs mean photon theory curve
         r_th=np.linspace(0,2.5,200)
         fig_sw=go.Figure()
@@ -1002,7 +1233,7 @@ def page_gbs():
                        font=dict(size=12,color="#6366f1"),x=0.5),
             xaxis_title="Squeezing r",yaxis_title="⟨n⟩")
         st.plotly_chart(fig_sw,use_container_width=True)
-
+ 
     with tab4:
         st.markdown("### Continuous-Variable Quantum Machine Learning")
         st.markdown("""<div class="eq">
@@ -1011,11 +1242,11 @@ def page_gbs():
         Parameter-shift rule:  ∂⟨Ô⟩/∂θ = ½[⟨Ô⟩_{θ+π/2} − ⟨Ô⟩_{θ−π/2}]<br>
         CV-QNN layers:  D(α)·S(r)·R(φ) + Kerr nonlinearity
         </div>""",unsafe_allow_html=True)
-
+ 
         theta=np.array(GD["qml_theta"])
         exp_x=np.array(GD["qml_exp_x"])
         grad =np.array(GD["qml_gradient"])
-
+ 
         c1,c2=st.columns(2)
         with c1:
             fig_q=go.Figure()
@@ -1026,7 +1257,7 @@ def page_gbs():
                            font=dict(size=12,color="#6366f1"),x=0.5),
                 xaxis_title="θ (rad)",yaxis_title="⟨X̂⟩")
             st.plotly_chart(fig_q,use_container_width=True)
-
+ 
         with c2:
             fig_g=go.Figure()
             fig_g.add_trace(go.Scatter(x=theta,y=grad,mode="lines",
@@ -1037,7 +1268,7 @@ def page_gbs():
                            font=dict(size=12,color="#22d3ee"),x=0.5),
                 xaxis_title="θ (rad)",yaxis_title="Gradient")
             st.plotly_chart(fig_g,use_container_width=True)
-
+ 
         steps=np.array(GD["qml_steps"]); loss=np.array(GD["qml_loss"])
         show_log = st.checkbox("Log scale loss", value=True, key="gbs_log")
         fig_tr=go.Figure(go.Scatter(x=steps,y=loss,mode="lines",
@@ -1049,14 +1280,14 @@ def page_gbs():
                        font=dict(size=12,color="#f472b6"),x=0.5),
             xaxis_title="Training step",yaxis_title="MSE Loss")
         st.plotly_chart(fig_tr,use_container_width=True)
-
+ 
         st.markdown("""<div class="insight"><div class="t">💡 Why CV-QML?</div>
         <p>CV quantum neural networks use <b>Gaussian gates</b> (displacement, squeezing, rotation)
         and <b>non-Gaussian gates</b> (Kerr) as trainable layers.
         The parameter-shift rule gives <b>exact analytic gradients</b> on real quantum hardware.
         Xanadu's Borealis processor demonstrated quantum advantage via GBS in 2022.</p>
         </div>""",unsafe_allow_html=True)
-
+ 
 # ════════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ════════════════════════════════════════════════════════════════════════════════
@@ -1067,6 +1298,6 @@ def main():
     elif "Witness Lab"       in page: page_witness_lab()
     elif "Channel Simulator" in page: page_channel_simulator()
     elif "GBS"               in page: page_gbs()
-
+ 
 if __name__ == "__main__":
     main()
