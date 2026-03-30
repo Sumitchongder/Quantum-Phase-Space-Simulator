@@ -325,9 +325,10 @@ def sidebar():
 STATE_META = {
     "Fock |n⟩": {
         "emoji":"🎯","color":"#f472b6","classical":False,
-        "eq":"â†â|n⟩ = n|n⟩  —  exact n photons",
+        "eq":"â†â|n⟩ = n|n⟩  —  exact n photons  (|0⟩ = vacuum = classical)",
         "desc":"Fock states have <b>exactly n photons</b> — perfect number certainty, total phase uncertainty. "
-               "Their Wigner function goes <b>negative</b> (pink/red regions): a smoking gun for non-classicality. "
+               "For <b>n ≥ 1</b>: Wigner function goes <b>negative</b> — a rigorous proof of non-classicality. "
+               "<b>|0⟩ (vacuum)</b> is a special case: it is classical (P = δ²(α), W = Gaussian). "
                "Used in photonic quantum computing as qubit encodings.",
     },
     "Coherent |α⟩": {
@@ -339,24 +340,30 @@ STATE_META = {
     },
     "Squeezed |r,φ⟩": {
         "emoji":"🔧","color":"#6366f1","classical":False,
-        "eq":"S(ξ)|0⟩,  ξ = r·e^{iφ}  —  Δx = e^{−r}/√2",
-        "desc":"Squeezing compresses noise in one quadrature, amplifying the other. "
-               "Below <b>shot-noise limit</b> in x → squeezed ellipse in Wigner plot. "
-               "Used in <b>LIGO</b> gravitational-wave detection.",
+        "eq":"S(ξ)|0⟩,  ξ = r·e^{iφ}  —  Δx = e^{−r}/√2,  Δp = e^{r}/√2",
+        "desc":"Squeezing compresses noise in one quadrature (Δx = e^{−r}/√2 < shot noise) "
+               "while amplifying the other (Δp = e^{r}/√2). "
+               "The Wigner function is a <b>Gaussian ellipse</b> — always non-negative! "
+               "Non-classicality is detected via the <b>P-function</b> (singular), not Wigner negativity. "
+               "Δx·Δp = ½ (minimum uncertainty). Used in <b>LIGO</b> for gravitational-wave detection.",
     },
     "Thermal ρ_th": {
         "emoji":"🌡️","color":"#fb923c","classical":True,
-        "eq":"ρ_th = Σ [n̄ⁿ/(1+n̄)ⁿ⁺¹] |n⟩⟨n|",
+        "eq":"ρ_th = Σ [n̄ⁿ/(1+n̄)ⁿ⁺¹] |n⟩⟨n|  —  n̄ = ⟨n⟩",
         "desc":"Thermal (blackbody) radiation — a <b>mixed state</b>. "
-               "Broad Gaussian Wigner, always positive. Super-Poissonian stats (Mandel Q > 0). "
-               "Maximum entropy for a given mean photon number.",
+               "Gaussian Wigner function (always positive). Super-Poissonian stats: Mandel Q = n̄ > 0. "
+               "Maximum von Neumann entropy for a given ⟨n⟩: S = (n̄+1)log(n̄+1) − n̄ log(n̄). "
+               "Symplectic eigenvalue ν = 2n̄+1. Classical via both Wigner (≥0) and P-function (Gaussian).",
     },
     "Cat State": {
         "emoji":"🐱","color":"#a3e635","classical":False,
-        "eq":"|cat±⟩ = N(|α⟩ ± |−α⟩)  —  Schrödinger's cat",
+        "eq":"|cat±⟩ = N(|α⟩ ± |−α⟩),  N = 1/√(2±2e^{−2|α|²})",
         "desc":"Quantum superposition of two coherent states. Shows spectacular "
-               "<b>interference fringes</b> between the two Gaussian blobs — proof of quantum coherence. "
-               "Even/odd cat states are eigenstates of photon-number parity.",
+               "<b>interference fringes</b> in the Wigner function between the two Gaussian blobs — "
+               "a direct proof of quantum coherence. "
+               "Even (+) cat: only even photon numbers. Odd (−) cat: only odd photon numbers. "
+               "Fringe visibility ∝ e^{−2|α|²} (decays with decoherence). "
+               "Non-classicality: WNV > 0, Mandel Q &lt; −1.",
     },
     "Displaced-Squeezed": {
         "emoji":"🌀","color":"#22d3ee","classical":False,
@@ -367,10 +374,13 @@ STATE_META = {
     },
     "GKP State": {
         "emoji":"🛡️","color":"#c084fc","classical":False,
-        "eq":"|GKP⟩ ∝ Σ_n e^{−δ²n²} D(n√π)|0⟩",
-        "desc":"Gottesman-Kitaev-Preskill code: a grid of displaced vacua in phase space. "
-               "Encodes a <b>logical qubit</b> in an oscillator. "
-               "The leading approach for photonic <b>quantum error correction</b>.",
+        "eq":"|GKP⟩ ∝ Σ_n e^{−δ²n²} D(n√π)|0⟩  (δ = envelope width)",
+        "desc":"Gottesman-Kitaev-Preskill code states form a <b>grid in phase space</b> "
+               "(comb of displaced squeezed states separated by √π). "
+               "Encodes a <b>logical qubit</b> in a harmonic oscillator, "
+               "correcting displacement errors up to √π/2. "
+               "δ controls the envelope: small δ = sharper peaks, better error correction, more energy. "
+               "The leading approach for photonic <b>quantum error correction</b> (IBM, Xanadu).",
     },
 }
  
@@ -484,13 +494,25 @@ def page_state_explorer():
  
             neg = f"{wnv:.5f}" if wnv>0.001 else "≈ 0"
             is_nonclassical = (wnv > 0.001) or (not meta["classical"])
-            
+            # Squeezed vacuum: W is analytically Gaussian (always positive)
+            # Any small WNV is a grid discretization artifact — correct this display
+            is_squeezed_vacuum = (grp == "squeezed")
+            if is_squeezed_vacuum:
+                wnv_display = "≈ 0 (grid artifact — squeezed vacuum W is Gaussian)"
+                nc_verdict = "Non-classical ⚡ — but via <b>P-function</b> (singular), not Wigner negativity"
+            elif wnv > 0.001:
+                wnv_display = f"{wnv:.5f}"
+                nc_verdict = "Non-classical ⚡ — Wigner negativity proven"
+            else:
+                wnv_display = "≈ 0 (classical)"
+                nc_verdict = "Classical ☀️ — W(x,p) ≥ 0 everywhere"
+ 
             st.markdown(f"""
             <div class="insight"><div class="t">💡 What you're seeing</div>
             <p>W(x,p) is a quasi-probability distribution in phase space.
-            <b>Pink/red = negative</b> — impossible classically.
-            Wigner Negativity Volume = <b>{neg}</b>.
-            {'This state is <b>non-classical</b> ✅' if is_nonclassical else 'This state is <b>classical</b> ❌'}
+            <b>Pink/red = negative</b> — impossible for classical states.
+            Wigner Negativity Volume = <b>{wnv_display}</b>. {nc_verdict}.<br>
+            <b>Hudson's theorem:</b> W ≥ 0 everywhere ⟺ state is a <i>pure Gaussian</i> (coherent or squeezed vacuum).
             </p></div>""", unsafe_allow_html=True)
  
  
@@ -498,9 +520,10 @@ def page_state_explorer():
             st.plotly_chart(fq(sd["Q"], xvec, f"Husimi Q — {state_type}", h=440),
                             use_container_width=True)
             st.markdown("""<div class="insight"><div class="t">💡 Husimi Q-function</div>
-            <p>Q(α) = ⟨α|ρ|α⟩/π — always non-negative (smoother than Wigner).
-            Brighter = more likely to find the state at that phase-space point.
-            Measured via heterodyne detection.</p></div>""", unsafe_allow_html=True)
+            <p>Q(α) = ⟨α|ρ|α⟩/π ≥ 0 always — normalized so ∫Q(α)d²α = 1.
+            Smoother than Wigner (never negative), so <b>cannot witness non-classicality</b> directly.
+            Brighter regions show where the state has highest overlap with coherent states.
+            Measured experimentally via <b>heterodyne detection</b>.</p></div>""", unsafe_allow_html=True)
  
         with tab3:
             st.plotly_chart(fpn(m["probs"], m["mean_n"], f"P(n) — {state_type}", h=360),
@@ -757,9 +780,12 @@ def page_witness_lab():
         Any negativity or singularity (more singular than a Dirac delta) → <b>NON-CLASSICAL</b>.<br>
         • <b>Coherent</b>: P = δ²(α−α₀) — delta function, non-negative → classical<br>
         • <b>Thermal</b>: P = Gaussian ≥ 0 → classical<br>
-        • <b>Fock</b>: P involves derivatives of delta → singular → non-classical<br>
+        • <b>Fock |0⟩</b>: P = δ²(α) — delta at origin → classical ✅<br>
+        • <b>Fock |n≥1⟩</b>: P involves nth-order derivatives of δ → singular → non-classical ⚡<br>
         • <b>Squeezed/Cat/GKP</b>: P is negative or highly singular → non-classical<br>
-        Hudson's theorem: W(x,p) ≥ 0 everywhere ⟺ P is a non-negative Gaussian (coherent/thermal only).
+        <b>Hudson's theorem</b>: W(x,p) ≥ 0 everywhere ⟺ state is a <i>pure Gaussian state</i> (coherent or squeezed vacuum).<br>
+        <b>P-function criterion</b>: P(α) ≥ 0 and regular ⟺ state is <i>classical</i> (coherent or thermal mixture).<br>
+        Note: squeezed vacuum satisfies Hudson (W≥0) but is non-classical (P singular).
         </p></div>""", unsafe_allow_html=True)
  
     with tab2:
@@ -775,8 +801,9 @@ def page_witness_lab():
             xaxis_tickangle=-45,xaxis_title="",yaxis_title="WNV")
         st.plotly_chart(fig,use_container_width=True)
         st.markdown("""<div class="insight"><div class="t">💡 WNV</div>
-        <p>WNV = ∫|W(x,p)|dxdp − 1. Any WNV > 0 proves non-classicality (Hudson's theorem).
-        Coherent and thermal states have WNV = 0 by definition.</p></div>""",unsafe_allow_html=True)
+        <p>WNV = ∫|W(x,p)|dxdp − 1. Any WNV > 0 is a sufficient (not necessary) condition for non-classicality.
+        <b>Hudson's theorem</b> (separate): W(x,p) ≥ 0 everywhere ⟺ the state is a pure Gaussian (coherent or squeezed vacuum).
+        Coherent and thermal states have WNV = 0. Note: squeezed vacuum also has WNV ≈ 0 but is non-classical via its P-function.</p></div>""",unsafe_allow_html=True)
  
     with tab3:
         grp_sel = st.multiselect("Highlight groups",
@@ -834,7 +861,8 @@ def page_witness_lab():
         ρ = ∫ P(α)|α⟩⟨α| d²α  — P-representation<br>
         Classical state ⟺  P(α) ≥ 0 everywhere and regular<br>
         Non-classical state ⟺  P(α) &lt; 0  OR  more singular than δ²(α)<br>
-        Hudson's theorem:  W(x,p) ≥ 0 ⟺ state is Gaussian (coherent or thermal)
+        Hudson's theorem:  W(x,p) ≥ 0 everywhere ⟺ state is a <b>pure Gaussian</b> (coherent or squeezed vacuum)<br>
+        P-function criterion (stronger):  P(α) ≥ 0 and regular ⟺ state is <b>classical</b> (coherent or thermal)
         </div>""", unsafe_allow_html=True)
  
         # P-function classification chart
@@ -893,6 +921,8 @@ def page_witness_lab():
             except: continue
             wnv=sd.get("wnv",0.0)
             # Fock |0⟩ (vacuum) is classical — P = δ²(α), same as coherent α=0
+            # Squeezed vacuum: W≥0 (Gaussian) so WNV≈0, but P-function singular → non-classical
+            # We mark squeezed as non-classical correctly but via P-function
             is_classical = (grp in ["coherent","thermal"]) or (grp == "fock" and key == 0)
             p_rows.append({"State":label,"P-classical":is_classical,
                            "WNV":round(wnv,5),
@@ -980,9 +1010,11 @@ CHANNEL_THEORY = {
         "key":"phase_sweep","param":"phi","label":"Phase φ (rad)",
     },
     "Loss channel (Lindblad)": {
-        "eq":"dρ/dt = γ(aρa† − ½{a†a,ρ})   — amplitude damping",
+        "eq":"dρ/dt = γ(aρa† − ½{a†a,ρ})   — Lindblad master equation",
         "desc":"Every photon lost to environment increases <b>entropy</b> and decreases <b>purity</b>. "
-               "Most physically important channel. Coherent state stays coherent, amplitude decays as e^{−γt/2}.",
+               "The most physically important channel (mirrors, fibre, detectors). "
+               "Coherent state stays coherent but amplitude decays: α → αe^{−γt/2}. "
+               "Fock states and cat states rapidly decohere → classical mixtures.",
         "key":"loss_sweep","param":"gamma_t","label":"γt (loss)",
     },
 }
