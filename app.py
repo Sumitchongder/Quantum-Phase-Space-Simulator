@@ -348,11 +348,13 @@ def page_state_explorer():
         if state_type == "Fock |n⟩":
             n_sel = st.select_slider("Photon number n", options=[0,1,2,3,5], key="se_fock")
             grp, key = "fock", n_sel
-
-        # Special case: vacuum Fock state is classical
-        elif state_type == "Fock |n⟩" and n_sel == 0:
-            meta = dict(meta)  # copy so you don’t mutate STATE_META globally
-            meta["classical"] = True
+            
+            # INNER CHECK: If n is 0, override the metadata to show as classical
+            if n_sel == 0:
+                meta = meta.copy()  # Create a local copy to avoid modifying the global STATE_META
+                meta["classical"] = True
+                meta["emoji"] = "⭕" # Optional: distinct emoji for vacuum
+                meta["desc"] = "The <b>Vacuum State</b> |0⟩ is the lowest energy state. It is technically a Fock state but is Gaussian and purely classical."
 
         elif state_type == "Coherent |α⟩":
             alpha_opts = {"α=0 (vacuum)":"0,0","α=1":"1,0","α=2":"2,0",
