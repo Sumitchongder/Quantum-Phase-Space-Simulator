@@ -524,53 +524,53 @@ def page_phase_space_zoo():
         cols[idx%ncol].plotly_chart(fig, use_container_width=True)
 
     # ── Scorecard ──
-        if show_score:
-            st.markdown("### 📊 Non-classicality Scorecard")
-            rows = []
-            for (grp, key, label) in ZOO_CONFIGS:
-                try:
-                    sd = SD[grp][key]
-                except:
-                    sd = list(SD[grp].values())[0]
+    if show_score:
+        st.markdown("### 📊 Non-classicality Scorecard")
+        rows = []
+        for (grp, key, label) in ZOO_CONFIGS:
+            try:
+                sd = SD[grp][key]
+            except:
+                sd = list(SD[grp].values())[0]
         
-                m = sd["metrics"]
-                wnv = sd.get("wnv", 0.0)
-                mandel_q = m.get("mandel_Q", None)
+            m = sd["metrics"]
+            wnv = sd.get("wnv", 0.0)
+            mandel_q = m.get("mandel_Q", None)
         
-                # Decision logic for non-classicality
-                if wnv > 0.001:
-                    is_nonclassical = True
-                elif mandel_q is not None and mandel_q < 0:
-                    is_nonclassical = True
-                elif "Disp-Sq" in label or "Squeezed" in label or "Cat" in label or "GKP" in label:
-                    # Explicitly mark these families as non-classical
-                    is_nonclassical = True
-                elif "Thermal" in label or "Fock |0⟩" in label or "Coherent" in label:
-                    # Classical states
-                    is_nonclassical = False
-                else:
-                    is_nonclassical = False
+            # Decision logic for non-classicality
+            if wnv > 0.001:
+                is_nonclassical = True
+            elif mandel_q is not None and mandel_q < 0:
+                is_nonclassical = True
+            elif "Disp-Sq" in label or "Squeezed" in label or "Cat" in label or "GKP" in label:
+                # Explicitly mark these families as non-classical
+                is_nonclassical = True
+            elif "Thermal" in label or "Fock |0⟩" in label or "Coherent" in label:
+                # Classical states
+                is_nonclassical = False
+            else:
+                is_nonclassical = False
         
-                rows.append({
-                    "State": label,
-                    "⟨n⟩": m["mean_n"],
-                    "Purity": m["purity"],
-                    "Entropy S(ρ)": m["entropy"],
-                    "Mandel Q": mandel_q if mandel_q is not None else "—",
-                    "WNV": round(wnv, 5),
-                    "Non-classical": "✅" if is_nonclassical else "❌"
-                })
+            rows.append({
+                "State": label,
+                "⟨n⟩": m["mean_n"],
+                "Purity": m["purity"],
+                "Entropy S(ρ)": m["entropy"],
+                "Mandel Q": mandel_q if mandel_q is not None else "—",
+                "WNV": round(wnv, 5),
+                "Non-classical": "✅" if is_nonclassical else "❌"
+            })
         
-            # Render the table only once
-            df = pd.DataFrame(rows)
-            st.dataframe(df, use_container_width=True, hide_index=True, height=320)
-            st.markdown("""<div class="insight"><div class="t">💡 Reading the table</div>
-            <p><b>WNV > 0</b> rigorously proves non-classicality.<br>
-            <b>Mandel Q &lt; 0</b> = sub-Poissonian photon statistics (non-classical).<br>
-            <b>Purity = 1</b> = pure state. <b>Entropy = 0</b> = no classical uncertainty.<br>
-            Thermal, coherent, and vacuum states are classical mixtures even if Mandel Q ≥ 0.<br>
-            Displaced squeezed, squeezed, cat, and GKP states are always non-classical.</p>
-            </div>""", unsafe_allow_html=True)
+        # Render the table only once
+        df = pd.DataFrame(rows)
+        st.dataframe(df, use_container_width=True, hide_index=True, height=320)
+        st.markdown("""<div class="insight"><div class="t">💡 Reading the table</div>
+        <p><b>WNV > 0</b> rigorously proves non-classicality.<br>
+        <b>Mandel Q &lt; 0</b> = sub-Poissonian photon statistics (non-classical).<br>
+        <b>Purity = 1</b> = pure state. <b>Entropy = 0</b> = no classical uncertainty.<br>
+        Thermal, coherent, and vacuum states are classical mixtures even if Mandel Q ≥ 0.<br>
+        Displaced squeezed, squeezed, cat, and GKP states are always non-classical.</p>
+        </div>""", unsafe_allow_html=True)
 
 
 
