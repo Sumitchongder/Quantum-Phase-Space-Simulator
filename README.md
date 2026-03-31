@@ -1,22 +1,14 @@
-<div align="center">
-
-<!-- ═══════════════════════════════════════════════════════════ -->
-<!--  ADD YOUR SCREENSHOT: upload the dashboard screenshot to  -->
-<!--  assets/dashboard_preview.png in your repo               -->
-<!--  Then this image renders automatically below             -->
-<!-- ═══════════════════════════════════════════════════════════ -->
-
-<img src="assets/dashboard_preview.png" alt="CV Quantum Phase Space Explorer Dashboard" width="90%"/>
-
-<br/><br/>
-
 <h1>⚛️ CV Quantum Phase Space Explorer</h1>
 
-<h3><em>Research-grade interactive platform for Continuous-Variable Quantum Information</em></h3>
+<div align="center">
+  
+<h3><em>An Interactive Platform for Exploring Continuous-Variable Quantum Information across Diverse Quantum State Representations</em></h3>
+
+</div>
 
 <br/>
 
-<table>
+<table align="center">
 <tr>
 <td align="center">
 <a href="https://quantum-phase-space-explorer.streamlit.app/">
@@ -44,10 +36,12 @@
 
 ## 🌐 Live Dashboard
 
+<div align="center">
+  
 ### Try it instantly -> no installation, no login, no API key
 
 <br/>
-
+  
 <a href="https://quantum-phase-space-explorer.streamlit.app/">
 <img src="https://img.shields.io/badge/CLICK%20TO%20OPEN%20LIVE%20DASHBOARD%20%E2%86%97-quantum--phase--space--explorer.streamlit.app-6366f1?style=for-the-badge&labelColor=020817" width="80%"/>
 </a>
@@ -60,7 +54,15 @@
 
 *Explore 8 quantum states · 4 phase-space representations · live Wigner functions · Gaussian Boson Sampling · CV-QML*
 
+</div>
+
 <br/>
+
+<div align="center">
+
+<img src="assets/dashboard_preview.png" alt="CV Quantum Phase Space Explorer Dashboard" width="90%"/>
+
+<br/><br/>
 
 ---
 
