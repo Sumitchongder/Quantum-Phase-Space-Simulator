@@ -44,7 +44,7 @@
 
 ## 🌐 Live Dashboard
 
-### Try it instantly — no installation, no login, no API key
+### Try it instantly -> no installation, no login, no API key
 
 <br/>
 
@@ -88,7 +88,7 @@
 
 **CV Quantum Phase Space Explorer** is a research-grade interactive platform for the comprehensive study of **continuous-variable (CV) quantum information theory**. Built on QuTiP 5.2, Strawberry Fields 0.23, and PennyLane 0.42, it provides deep quantum-optical simulation and visualisation in a zero-friction web interface.
 
-The project systematically covers **8 quantum state classes**, **6 quantum channel families**, **Gaussian Boson Sampling**, and **CV quantum machine learning** — all backed by full Lindblad master-equation simulations on the **IIT Jodhpur HPC cluster** and served via a **pre-computation architecture** achieving ~3 s dashboard load time with zero heavy-library runtime dependencies.
+The project systematically covers **8 quantum state classes**, **6 quantum channel families**, **Gaussian Boson Sampling**, and **CV quantum machine learning**, all backed by full Lindblad master-equation simulations on the **IIT Jodhpur HPC cluster** and served via a **pre-computation architecture** achieving ~3 s dashboard load time with zero heavy-library runtime dependencies.
 
 ```
 8 quantum states · 4 representations · 6 channels · 124 figures · 1978-line utility library
@@ -101,7 +101,7 @@ The project systematically covers **8 quantum state classes**, **6 quantum chann
 | Representations | 4 (Wigner W, Husimi Q, Glauber-Sudarshan P, Characteristic χ) |
 | Channels simulated | 6 (Displacement, Squeezing, Phase shift, Beam splitter, Lindblad loss, Amplification) |
 | Figures generated | 124 across 8 Jupyter notebooks |
-| Utility library | `quantum_utils.py` — 1978 lines, 15 modules, 25 validation tests |
+| Utility library | `quantum_utils.py` 1978 lines, 15 modules, 25 validation tests |
 | Dashboard load | ~3 s (pre-computation architecture) |
 | Compute platform | IIT Jodhpur HPC (cn03), QuTiP 5.2.3 + NumPy 2.2.6 |
 
@@ -109,9 +109,9 @@ The project systematically covers **8 quantum state classes**, **6 quantum chann
 
 ## 🖥️ Dashboard Pages
 
-> **Live at [`quantum-phase-space-explorer.streamlit.app`](https://quantum-phase-space-explorer.streamlit.app/) — no setup required.**
+> **Live at [`quantum-phase-space-explorer.streamlit.app`](https://quantum-phase-space-explorer.streamlit.app/) -> no setup required.**
 
-### 🔬 Page 1 — State Explorer
+### 🔬 Page 1 - State Explorer
 
 Interactive exploration of all 8 CV quantum states with live parameter controls.
 
@@ -122,7 +122,7 @@ Interactive exploration of all 8 CV quantum states with live parameter controls.
 - Density matrix ρ (exact stored or analytically reconstructed from P(n))
 - 6 live quantum metric cards: ⟨n⟩, Purity Tr(ρ²), von Neumann entropy, Mandel Q, ΔxΔp, WNV
 
-### 🌌 Page 2 — Phase Space Zoo
+### 🌌 Page 2 - Phase Space Zoo
 
 Side-by-side 2×4 comparison grid of all 8 states simultaneously.
 
@@ -131,7 +131,7 @@ Side-by-side 2×4 comparison grid of all 8 states simultaneously.
 - Interactive 2 or 4 column grid control
 - Full scorecard comparison table with all metrics and CSV download
 
-### 🧪 Page 3 — Witness Lab
+### 🧪 Page 3 - Witness Lab
 
 Five-tab quantitative non-classicality dashboard.
 
@@ -141,7 +141,7 @@ Five-tab quantitative non-classicality dashboard.
 - Heisenberg uncertainty product with ΔxΔp = ½ limit annotated
 - **Glauber-Sudarshan P-function tab** - analytic interactive plots with live sliders for n̄ and α₀
 
-### ⚡ Page 4 — Channel Simulator
+### ⚡ Page 4 - Channel Simulator
 
 Apply quantum channels and watch the Wigner function evolve.
 
@@ -150,7 +150,7 @@ Apply quantum channels and watch the Wigner function evolve.
 - All-snapshots thumbnail strip for at-a-glance evolution view
 - 2×2 metric evolution grid: purity, entropy, ⟨n⟩, Heisenberg product vs. channel parameter
 
-### 🔭 Page 5 — GBS & CV-QML
+### 🔭 Page 5 - GBS & CV-QML
 
 Four-tab Gaussian Boson Sampling and quantum machine learning page.
 
@@ -260,11 +260,11 @@ quantum-phase-space-explorer/
 
 ## 🚀 Installation
 
-### Option A — Live dashboard *(recommended — zero setup)*
+### Option A - Live dashboard *(recommended - zero setup)*
 
 Open **[quantum-phase-space-explorer.streamlit.app](https://quantum-phase-space-explorer.streamlit.app/)** in any browser. Done in 3 seconds.
 
-### Option B — Run locally
+### Option B - Run locally
 
 ```bash
 git clone https://github.com/Sumitchongder/quantum-phase-space-explorer.git
@@ -275,7 +275,7 @@ streamlit run app.py
 
 Requires Python ≥ 3.10. No GPU needed.
 
-### Option C — Full HPC / regenerate data
+### Option C - Full HPC / regenerate data
 
 ```bash
 pip install -r requirements_hpc.txt
@@ -283,7 +283,7 @@ python generate_data.py       # ~15-30 min on HPC, produces data/*.pkl
 streamlit run app.py
 ```
 
-### Option D — Jupyter notebooks
+### Option D - Jupyter notebooks
 
 ```bash
 pip install -r requirements_hpc.txt
@@ -337,15 +337,15 @@ Thermal    ░░░░░░░░░░░░░░░░░░░░░░░
 | Cat even α=2 | 1.000 | 0.000 | −0.963 | 0.468 | 0.558 | 64.000 |
 | GKP δ=0.3 | 0.921 | 0.115 | −0.612 | 0.893 | 0.622 | 47.200 |
 
-### Validation — 25/25 Tests Passed
+### Validation - 25/25 Tests Passed
 
 ```
 ✅  All state traces Tr(ρ) = 1.000           ✅  Coherent Mandel Q = 0.000 exactly
 ✅  All pure-state purities = 1.000          ✅  Fock |n≥1⟩ WNV > 0 confirmed
-✅  Wigner normalisation ∫W dxdp = 1.0000   ✅  Cat state WNV > 0 confirmed
-✅  Husimi Q(α) ≥ 0 everywhere              ✅  Fidelity F(ρ,ρ) = 1 for all states
-✅  Vacuum Heisenberg ΔxΔp = 0.5000        ✅  TMSV log-negativity E_N > 0
-✅  Squeezed Δx < 1/√2 (below shot noise)  ✅  Hudson's theorem verified numerically
+✅  Wigner normalisation ∫W dxdp = 1.0000    ✅  Cat state WNV > 0 confirmed
+✅  Husimi Q(α) ≥ 0 everywhere               ✅  Fidelity F(ρ,ρ) = 1 for all states
+✅  Vacuum Heisenberg ΔxΔp = 0.5000          ✅  TMSV log-negativity E_N > 0
+✅  Squeezed Δx < 1/√2 (below shot noise)    ✅  Hudson's theorem verified numerically
 ```
 
 ---
@@ -399,7 +399,7 @@ This project follows the [Contributor Covenant v2.1](CODE_OF_CONDUCT.md). We are
 
 ## 📄 License
 
-MIT License — see [LICENSE](LICENSE). Free to use, modify, and distribute with attribution.
+MIT License - see [LICENSE](LICENSE). Free to use, modify, and distribute with attribution.
 
 ---
 
