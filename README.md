@@ -116,7 +116,7 @@ The project systematically covers **8 quantum state classes**, **6 quantum chann
 Interactive exploration of all 8 CV quantum states with live parameter controls.
 
 - State-type dropdown and preset parameter selectors
-- Wigner function W(x,p) — 2D heatmap **or** full interactive 3D surface toggle
+- Wigner function W(x,p) - 2D heatmap **or** full interactive 3D surface toggle
 - Husimi Q-function Q(α)
 - Photon number distribution P(n) with Poisson reference overlay
 - Density matrix ρ (exact stored or analytically reconstructed from P(n))
@@ -139,7 +139,7 @@ Five-tab quantitative non-classicality dashboard.
 - Wigner Negativity Volume (WNV) bar chart with Hudson's theorem correctly stated
 - Purity vs. von Neumann Entropy scatter with multiselect group highlighting
 - Heisenberg uncertainty product with ΔxΔp = ½ limit annotated
-- **Glauber-Sudarshan P-function tab** — analytic interactive plots with live sliders for n̄ and α₀
+- **Glauber-Sudarshan P-function tab** - analytic interactive plots with live sliders for n̄ and α₀
 
 ### ⚡ Page 4 — Channel Simulator
 
@@ -154,7 +154,7 @@ Apply quantum channels and watch the Wigner function evolve.
 
 Four-tab Gaussian Boson Sampling and quantum machine learning page.
 
-- GBS circuit visualisation (real Strawberry Fields 4- and 6-mode results)
+- GBS circuit visualisation (real Strawberry Fields 4-mode and 6-mode results)
 - Photon statistics: mean ⟨n⟩ per mode, Mandel Q, P(n) distribution
 - Hafnian complexity: brute-force verification vs. Thewalrus, Ryser O(2ⁿn²) scaling
 - CV-QML: ⟨X̂⟩(θ) parameter landscape, parameter-shift gradient, Adam training loss
@@ -311,7 +311,7 @@ jupyter notebook notebooks/
 
 ## 📊 Key Results
 
-### Wigner Negativity Volume — State Ranking
+### Wigner Negativity Volume - State Ranking
 
 ```
 Fock  |5⟩  ████████████████████████  1.062
@@ -352,7 +352,7 @@ Thermal    ░░░░░░░░░░░░░░░░░░░░░░░
 
 ## 🤝 Contributing
 
-Contributions of all kinds are welcome — new quantum states, channels, visualisations, theory corrections, or documentation.
+Contributions of all kinds are welcome - new quantum states, channels, visualisations, theory corrections, or documentation.
 
 See **[CONTRIBUTING.md](CONTRIBUTING.md)** for the full guide including physics standards, QuTiP coding conventions, commit format, and PR checklist.
 
