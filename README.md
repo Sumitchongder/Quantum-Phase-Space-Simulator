@@ -16,16 +16,16 @@
 </a>
 </td>
 <td align="center">
-<img src="https://img.shields.io/github/stars/Sumitchongder/quantum-phase-space-explorer?style=for-the-badge&logo=github&color=fbbf24&labelColor=1a1a2e" alt="Stars"/>
-</td>
-<td align="center">
-<img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e" alt="Python"/>
+<img src="https://img.shields.io/badge/Strawberry%20Fields-0.23.0-ff4d6d?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e" alt="Strawberry Fields"/>
 </td>
 <td align="center">
 <img src="https://img.shields.io/badge/QuTiP-5.2.3-a78bfa?style=for-the-badge&labelColor=1a1a2e" alt="QuTiP"/>
 </td>
 <td align="center">
-<img src="https://img.shields.io/badge/License-MIT-22d3ee?style=for-the-badge&labelColor=1a1a2e" alt="License"/>
+<img src="https://img.shields.io/badge/Pennylane-0.42.0-ff6f61?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e" alt="Pennylane"/>
+</td>
+<td align="center">
+<img src="https://img.shields.io/badge/Python-3.11-3776AB?style=for-the-badge&logo=python&logoColor=white&labelColor=1a1a2e" alt="Python"/>
 </td>
 </tr>
 </table>
