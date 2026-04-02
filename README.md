@@ -60,7 +60,7 @@
 
 <div align="center">
 
-<img src="assets/dashboard_preview.png" alt="CV Quantum Phase Space Explorer Dashboard" width="90%"/>
+<img src="assets/dashboard_preview.png" alt="CV Quantum Phase Space Simulator Dashboard" width="90%"/>
 
 <br/><br/>
 
